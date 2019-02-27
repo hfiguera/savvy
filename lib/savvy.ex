@@ -28,6 +28,59 @@ defmodule Savvy do
          {:json, {:ok, %{"success" => true, "data" => data}}} <- {:json, JSON.decode(body)} do
       data
     else
+      error ->
+        get_error(error)
+    end
+  end
+
+  @doc """
+  Get the current average market rates.
+  fiat_code Fiat currency (usd, eur, cad, etc)
+
+  ## Examples
+
+      iex> Savvy.get_rates("xxx")
+      {:error, "server error"}
+
+  """
+  @spec get_rates(bitstring()) :: map() | {:error, bitstring}
+  def get_rates(fiat_code) do
+    with {:http, {:ok, body}} <- {:http, HTTP.get("#{@url}/v3/exchange/#{fiat_code}/rate")},
+         {:json, {:ok, %{"success" => true, "data" => data}}} <- {:json, JSON.decode(body)} do
+      data
+    else
+      error ->
+        get_error(error)
+    end
+  end
+
+  @doc """
+  Get exchange rates for one currency
+
+  ## Examples
+
+      iex> Savvy.get_rate("xxx", "btc")
+      {:error, "server error"}
+
+      iex> Savvy.get_rate("usd", "xxx")
+      nil
+
+  """
+  @spec get_rate(bitstring(), bitstring()) :: map() | nil | {:error, bitstring}
+  def get_rate(fiat_code, crypto) do
+    case get_rates(fiat_code) do
+      {:error, error} ->
+        {:error, error}
+
+      rates ->
+        rates[crypto]
+    end
+  end
+
+  # Private funtions
+
+  defp get_error(error) do
+    case error do
       {:http, {:error, error}} ->
         {:error, error}
 

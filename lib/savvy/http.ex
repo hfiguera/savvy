@@ -3,13 +3,14 @@ defmodule Savvy.HTTP do
   Implement the HTTP requests
   """
 
+  @headers [{"Accept", "application/json"}]
   @doc """
   Issues a GET request to the given url.
 
   ## Examples
 
       iex> Savvy.HTTP.get("httpstat.us/200")
-      {:ok, ""}
+      {:ok, "\\"200 OK\\""}
 
       iex> Savvy.HTTP.get("httpstat.us/201")
       {:error, "server error"}
@@ -25,7 +26,7 @@ defmodule Savvy.HTTP do
   """
   @spec get(bitstring()) :: {:ok, bitstring()} | {:error, bitstring()}
   def get(url) do
-    case HTTPoison.get(url) do
+    case HTTPoison.get(url, @headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         {:ok, body}
 
