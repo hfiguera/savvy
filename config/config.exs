@@ -28,3 +28,8 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env()}.exs"
+
+config :savvy,
+  url: System.get_env("SAVVY_URL"),
+  secret: System.get_env("SAVVY_SECRET"),
+  callback: System.get_env("SAVVY_CALLBACK")
