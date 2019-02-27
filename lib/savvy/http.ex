@@ -16,7 +16,7 @@ defmodule Savvy.HTTP do
       {:ok, "\\"400 Bad Request\\""}
 
       iex> Savvy.HTTP.get("httpstat.us/404")
-      {:error, "bad endpoint"}
+      {:ok, "\\"404 Not Found\\""}
 
       iex> Savvy.HTTP.get("httpstat.us/500")
       {:error, "server error"}
@@ -33,8 +33,8 @@ defmodule Savvy.HTTP do
       {:ok, %HTTPoison.Response{status_code: 400, body: body}} ->
         {:ok, body}
 
-      {:ok, %HTTPoison.Response{status_code: 404}} ->
-        {:error, "bad endpoint"}
+      {:ok, %HTTPoison.Response{status_code: 404, body: body}} ->
+        {:ok, body}
 
       {:ok, %HTTPoison.Response{}} ->
         {:error, "server error"}

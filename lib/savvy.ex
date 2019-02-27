@@ -44,10 +44,21 @@ defmodule Savvy do
       iex> Savvy.get_rates("xxx")
       {:error, [%{"data" => "xxx", "message" => "unsupported currency"}]}
 
+      iex> Savvy.get_rates("usd", 1)
+      {:error,
+         [%{"data" => nil, "message" => "Exchanges was not found for this period"}]}
+
   """
-  @spec get_rates(bitstring()) :: map() | {:error, bitstring} | {:error, list(map())}
-  def get_rates(fiat_code) do
-    with {:http, {:ok, body}} <- {:http, HTTP.get("#{@url}/v3/exchange/#{fiat_code}/rate")},
+  @spec get_rates(bitstring(), integer()) :: map() | {:error, bitstring} | {:error, list(map())}
+  def get_rates(fiat_code, unix_time \\ -1) do
+    uri =
+      if unix_time == -1 do
+        "#{@url}/v3/exchange/#{fiat_code}/rate"
+      else
+        "#{@url}/v3/exchange/#{fiat_code}/rate?time=#{unix_time}"
+      end
+
+    with {:http, {:ok, body}} <- {:http, HTTP.get(uri)},
          {:json, {:ok, %{"success" => true, "data" => data}}} <- {:json, JSON.decode(body)} do
       data
     else
@@ -67,12 +78,33 @@ defmodule Savvy do
       iex> Savvy.get_rate("usd", "xxx")
       {:error, [%{"data" => "xxx", "message" => "unsupported chain type"}]}
 
+      iex> Savvy.get_rate("usd", "btc", 1)
+      {:error,
+        [%{"data" => nil, "message" => "Exchanges was not found for this period"}]}
+
+      iex> Savvy.get_rate("usd", "btc", 1546300800)
+      %{
+          "bitfinex" => 3832.8,
+          "bittrex" => 3700.6162327800002,
+          "coinmarketcap" => 3742.70033544,
+          "hitbtc" => 3719.27,
+          "mid" => 3738.0038736560005,
+          "poloniex" => 3694.63280006
+      }
+
   """
-  @spec get_rate(bitstring(), bitstring()) ::
+  @spec get_rate(bitstring(), bitstring(), integer()) ::
           map() | {:error, bitstring} | {:error, list(map())}
-  def get_rate(fiat_code, crypto) do
+  def get_rate(fiat_code, crypto, unix_time \\ -1) do
+    uri =
+      if unix_time == -1 do
+        "#{@url}/v3/#{crypto}/exchange/#{fiat_code}/rate"
+      else
+        "#{@url}/v3/#{crypto}/exchange/#{fiat_code}/rate?time=#{unix_time}"
+      end
+
     with {:http, {:ok, body}} <-
-           {:http, HTTP.get("#{@url}/v3/#{crypto}/exchange/#{fiat_code}/rate")},
+           {:http, HTTP.get(uri)},
          {:json, {:ok, %{"success" => true, "data" => data}}} <- {:json, JSON.decode(body)} do
       data
     else
