@@ -65,18 +65,19 @@ defmodule Savvy do
       {:error, [%{"data" => "xxx", "message" => "unsupported currency"}]}
 
       iex> Savvy.get_rate("usd", "xxx")
-      nil
+      {:error, [%{"data" => "xxx", "message" => "unsupported chain type"}]}
 
   """
   @spec get_rate(bitstring(), bitstring()) ::
-          map() | nil | {:error, bitstring} | {:error, list(map())}
+          map() | {:error, bitstring} | {:error, list(map())}
   def get_rate(fiat_code, crypto) do
-    case get_rates(fiat_code) do
-      {:error, error} ->
-        {:error, error}
-
-      rates ->
-        rates[crypto]
+    with {:http, {:ok, body}} <-
+           {:http, HTTP.get("#{@url}/v3/#{crypto}/exchange/#{fiat_code}/rate")},
+         {:json, {:ok, %{"success" => true, "data" => data}}} <- {:json, JSON.decode(body)} do
+      data
+    else
+      error ->
+        get_error(error)
     end
   end
 
