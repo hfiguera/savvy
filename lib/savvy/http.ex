@@ -12,11 +12,8 @@ defmodule Savvy.HTTP do
       iex> Savvy.HTTP.get("httpstat.us/200")
       {:ok, "\\"200 OK\\""}
 
-      iex> Savvy.HTTP.get("httpstat.us/201")
-      {:error, "server error"}
-
       iex> Savvy.HTTP.get("httpstat.us/400")
-      {:error, "server error"}
+      {:ok, "\\"400 Bad Request\\""}
 
       iex> Savvy.HTTP.get("httpstat.us/404")
       {:error, "bad endpoint"}
@@ -28,6 +25,12 @@ defmodule Savvy.HTTP do
   def get(url) do
     case HTTPoison.get(url, @headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        {:ok, body}
+
+      {:ok, %HTTPoison.Response{status_code: 201, body: body}} ->
+        {:ok, body}
+
+      {:ok, %HTTPoison.Response{status_code: 400, body: body}} ->
         {:ok, body}
 
       {:ok, %HTTPoison.Response{status_code: 404}} ->

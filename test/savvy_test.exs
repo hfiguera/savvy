@@ -46,4 +46,19 @@ defmodule SavvyTest do
 
     assert result
   end
+
+  test "create payment request and get payment btc address" do
+    payment = Savvy.create_payment("btc")
+
+    result =
+      case payment do
+        %{"address" => _, "invoice" => _} ->
+          true
+
+        _ ->
+          false
+      end
+
+    assert result
+  end
 end

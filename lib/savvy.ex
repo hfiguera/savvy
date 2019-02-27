@@ -17,6 +17,7 @@ defmodule Savvy do
 
   @url Application.get_env(:savvy, :url, "https://api.test.savvy.io")
   @token Application.get_env(:savvy, :secret, "YOUSAVVYSECRECT")
+  @callback_url URI.encode_www_form(Application.get_env(:savvy, :callback, ""))
 
   @doc """
   Get a list of enabled currencies
@@ -35,15 +36,16 @@ defmodule Savvy do
 
   @doc """
   Get the current average market rates.
-  fiat_code Fiat currency (usd, eur, cad, etc)
+
+  fiat_code: Fiat currency (usd, eur, cad, etc)
 
   ## Examples
 
       iex> Savvy.get_rates("xxx")
-      {:error, "server error"}
+      {:error, [%{"data" => "xxx", "message" => "unsupported currency"}]}
 
   """
-  @spec get_rates(bitstring()) :: map() | {:error, bitstring}
+  @spec get_rates(bitstring()) :: map() | {:error, bitstring} | {:error, list(map())}
   def get_rates(fiat_code) do
     with {:http, {:ok, body}} <- {:http, HTTP.get("#{@url}/v3/exchange/#{fiat_code}/rate")},
          {:json, {:ok, %{"success" => true, "data" => data}}} <- {:json, JSON.decode(body)} do
@@ -60,13 +62,14 @@ defmodule Savvy do
   ## Examples
 
       iex> Savvy.get_rate("xxx", "btc")
-      {:error, "server error"}
+      {:error, [%{"data" => "xxx", "message" => "unsupported currency"}]}
 
       iex> Savvy.get_rate("usd", "xxx")
       nil
 
   """
-  @spec get_rate(bitstring(), bitstring()) :: map() | nil | {:error, bitstring}
+  @spec get_rate(bitstring(), bitstring()) ::
+          map() | nil | {:error, bitstring} | {:error, list(map())}
   def get_rate(fiat_code, crypto) do
     case get_rates(fiat_code) do
       {:error, error} ->
@@ -77,8 +80,38 @@ defmodule Savvy do
     end
   end
 
+  @doc """
+  Create payment request and get payment address.
+
+  crypto: Crypto currency to accept (eth, btc, bch, ltc, dash, btg, etc)
+
+  ## Examples
+
+      iex> Savvy.create_payment("xxx")
+      {:error,
+         [%{"data" => "xxx", "message" => "unsupported blockchain or ERC20 token"}]}
+
+  """
+  @spec create_payment(bitstring(), integer()) ::
+          map() | {:error, bitstring} | {:error, list(map())}
+  def create_payment(crypto, lock_address_timeout \\ 3_600) do
+    uri =
+      "#{@url}/v3/#{crypto}/payment/#{@callback_url}?token=#{@token}&lock_address_timeout=#{
+        lock_address_timeout
+      }"
+
+    with {:http, {:ok, body}} <- {:http, HTTP.get(uri)},
+         {:json, {:ok, %{"success" => true, "data" => data}}} <- {:json, JSON.decode(body)} do
+      data
+    else
+      error ->
+        get_error(error)
+    end
+  end
+
   # Private funtions
 
+  @spec get_error(tuple()) :: {:error, bitstring()} | {:error, list(map())}
   defp get_error(error) do
     case error do
       {:http, {:error, error}} ->
@@ -86,6 +119,9 @@ defmodule Savvy do
 
       {:json, {:error, error}} ->
         {:error, error}
+
+      {:json, {:ok, %{"success" => false, "errors" => errors}}} ->
+        {:error, errors}
 
       {:json, {:ok, _}} ->
         {:error, "not success"}
