@@ -7,8 +7,11 @@ defmodule Savvy.MixProject do
       version: "0.1.0",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
+      description: description(),
+      package: package(),
       dialyzer: [plt_add_deps: :transitive],
-      deps: deps()
+      deps: deps(),
+      source_url: "https://github.com/hfiguera/savvy"
     ]
   end
 
@@ -27,6 +30,17 @@ defmodule Savvy.MixProject do
       {:credo, "~> 1.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0.0-rc.4", only: [:dev], runtime: false},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false}
+    ]
+  end
+
+  defp description() do
+    "SDK for Savvy https://www.savvy.io."
+  end
+
+  defp package() do
+    [
+      licenses: ["Apache 2.0"],
+      links: %{"GitHub" => "https://github.com/hfiguera/savvy"}
     ]
   end
 end
