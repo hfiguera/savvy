@@ -5,11 +5,22 @@
 You need to export the following environment variables with you own values before the
 Installation step:
 
+```
   export SAVVY_URL="https://api.test.savvy.io"
-
+  
   export SAVVY_SECRET="YOUSAVVYSECRECT"
-
+  
   export SAVVY_CALLBACK="http://localhost"
+```
+
+ after that, you need to put the following configuration in you config files:
+ 
+ ```
+ config :savvy,
+    url: System.get_env("SAVVY_URL"),
+    secret: System.get_env("SAVVY_SECRET"),
+    callback: System.get_env("SAVVY_CALLBACK")
+```
 
 ## Installation
 
