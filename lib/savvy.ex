@@ -17,7 +17,6 @@ defmodule Savvy do
 
   @url Application.get_env(:savvy, :url, "https://api.test.savvy.io")
   @token Application.get_env(:savvy, :secret, "YOUSAVVYSECRECT")
-  @callback_url URI.encode_www_form(Application.get_env(:savvy, :callback, ""))
 
   @doc """
   Get a list of enabled currencies
@@ -128,8 +127,10 @@ defmodule Savvy do
   @spec create_payment(bitstring(), integer()) ::
           map() | {:error, bitstring} | {:error, list(map())}
   def create_payment(crypto, lock_address_timeout \\ 3_600) do
+    callback_url = URI.encode_www_form(Application.get_env(:savvy, :callback, ""))
+
     uri =
-      "#{@url}/v3/#{crypto}/payment/#{@callback_url}?token=#{@token}&lock_address_timeout=#{
+      "#{@url}/v3/#{crypto}/payment/#{callback_url}?token=#{@token}&lock_address_timeout=#{
         lock_address_timeout
       }"
 
