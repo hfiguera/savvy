@@ -1,10 +1,19 @@
 # Savvy
 
-**TODO: Add description**
+**Elixir SDK for Savvy https://www.savvy.io**
+
+You need to export the following environment variables with you own values before the
+Installation step:
+
+  export SAVVY_URL="https://api.test.savvy.io"
+
+  export SAVVY_SECRET="YOUSAVVYSECRECT"
+
+  export SAVVY_CALLBACK="http://localhost"
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
+The package is [available in Hex](https://hex.pm/packages/savvy), and can be installed
 by adding `savvy` to your list of dependencies in `mix.exs`:
 
 ```elixir
@@ -15,7 +24,5 @@ def deps do
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/savvy](https://hexdocs.pm/savvy).
+The documentation can be found at [https://hexdocs.pm/savvy](https://hexdocs.pm/savvy).
 
