@@ -1,6 +1,6 @@
 defmodule Savvy do
   @moduledoc """
-  SDK for https://www.savvy.io/
+  SDK for Savvy https://www.savvy.io
 
   You need to export the following environment variables:
 
